@@ -4,14 +4,14 @@ import sys
 class Vertice:
 	"""Representa un vertice con operaciones ver adyacentes y agregar adyacentes."""
 
-	def __init__(self, id, label):
+	def __init__(self, iden, label):
 		"""Crea un vertice."""
-		self.id = id
+		self.iden = iden
 		self.label = label
 		self.dic_ady = {}
 
 	def __str__(self):
-		return(str(self.id))
+		return(str(self.iden))
 
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
@@ -19,10 +19,10 @@ class Vertice:
 
 	def agregar_adyacente(self, vertice):
 		"""Agrega adyacencia entre dos vertices."""
-		if vertice.id in self.adyacentes():
+		if vertice.iden in self.adyacentes():
 			return False
-		self.dic_ady[vertice.id] = vertice
-		vertice.dic_ady[self.id] = self
+		self.dic_ady[vertice.iden] = vertice
+		vertice.dic_ady[self.iden] = self
 
 class Grafo:
 	"""Representa un grafo con operaciones agregar y quitar un vertice, agregar y quitar una arista, 
@@ -39,14 +39,14 @@ class Grafo:
 		"""devuelve un diccionario con los vertices del Grafo"""
 		return self.vertices
 
-	def obtener_vertice(self,id):
+	def obtener_vertice(self, iden):
 		"""Devuelve el Vertice correspondiente al Identificador"""
-		return self.vertices.get(id, -1)
+		return self.vertices.get(iden, -1)
 
 	def agregar_vertice(self, vertice):
 		"""Agrega un vertice al grafo."""
-		if not vertice.id in self.vertices:
-			self.vertices[vertice.id] = vertice
+		if not vertice.iden in self.vertices:
+			self.vertices[vertice.iden] = vertice
 			self.cantidad_vert =+ 1
 		
 	def quitar_vertice(self,vertice):
@@ -54,8 +54,8 @@ class Grafo:
 		if not vertice in self.vertices:
 			return False
 		for adyacente in vertice.adyacentes:
-			self.vertices[adyacente].adyacentes.pop(vertice.id)
-		self.vertices.pop(vertice.id)
+			self.vertices[adyacente].adyacentes.pop(vertice.iden)
+		self.vertices.pop(vertice.iden)
 		self.cantidad_vertices -= 1
 		return True
 
@@ -72,8 +72,8 @@ class Grafo:
 		"""Quita una arista entre dos vertices."""
 		if not vertice_2 in vertice.adyacentes:
 			return False
-		vertice.adyacentes.pop(vertice_2.id)
-		vertice_2.adyacentes.pop(vertice.id)
+		vertice.adyacentes.pop(vertice_2.iden)
+		vertice_2.adyacentes.pop(vertice.iden)
 		self.cantidad_aris -= 1
 		return True
 
@@ -151,8 +151,8 @@ def random_walk(largo, cantidad, vertice, grafo):
 		i = 0
 		while i < largo:
 			w = get_rand_key(grafo.obtener_vertices())
-			cant = apariciones.get(w.id, 0)
-			apariciones[w.id] = cant+1  
+			cant = apariciones.get(w.iden, 0)
+			apariciones[w.iden] = cant+1  
 			i += 1
 			v = w
 	return apariciones
@@ -168,7 +168,7 @@ def heap_similares(vertice, largo, cantidad):
 	heap_min = []
 	heapq.heapify(heap_min)
 	for vertice in apariciones:
-		tupla = (apariciones[vertice.id], vertice.id)
+		tupla = (apariciones[vertice.iden], vertice.iden)
 		if len(heap_min) < largo:
 			heapq.heappush(heap_min, tupla)
 		else:
@@ -211,11 +211,11 @@ def similares(id, n, grafo):
 	for i in range(len(heap_min)):
 		print("{}\t".format(heap_min[i][1]),end=" ")
 
-def recomendar(id, n, grafo):
+def recomendar(iden, n, grafo):
 	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación, y sea lo más similar a él posible."""
 	if not validar_cantidad(grafo, n):
 		return -1 
-	vertice = grafo.obtener_vertice(id)
+	vertice = grafo.obtener_vertice(iden)
 	if vertice == -1:
 		return False
 	lista = []
@@ -223,22 +223,22 @@ def recomendar(id, n, grafo):
 	for i in range(len(heap_min)):
 		cant, vertice_aux = heapq.heappop(heap_min)
 		if not vertice_aux in grafo.adyacentes_vertice(vertice):
-			lista.append(vertice_aux.id)
+			lista.append(vertice_aux.iden)
 	for c in range(len(lista)-1,-1,-1):
 		print("{}\t".format(lista[(i)]))
 	#VER QUE HACEMOS SI NO IMPRIME SUFICIENTE
 
 def camino(id_1, id_2, grafo):
 	"""Busca el camino mas corto entre dos vertices."""
-	vertice_1 = grafo.obtener_vertice(id)
+	vertice_1 = grafo.obtener_vertice(iden)
 	if vertice_1 == -1:
 		return False
-	vertice_2 = grafo.obtener_vertice(id)
+	vertice_2 = grafo.obtener_vertice(iden)
 	if vertice_2 == -1:
 		return False	
 	lista_camino = []
-	padre = vertice_2.id
-	lista_camino.append(vertice_2.id)
+	padre = vertice_2.iden
+	lista_camino.append(vertice_2.iden)
 	for i in range(len(camino)):
 		padre = camino[padre]
 		lista_camino.append(padre)
@@ -263,8 +263,8 @@ def centralidad(n, grafo):
 				if heap[0][0] < heap_min[0][0]:
 					heapq.heapreplace(heap,heapq.heappop(heap_min))
 
-"""def distancias(id, grafo):
-	vertice = grafo.obtener_vertice(id)
+"""def distancias(iden, grafo):
+	vertice = grafo.obtener_vertice(iden)
 	if vertice == -1:
 		return False
 	camino, distancia = recorrido_BFS(grafo, vertice)
@@ -281,7 +281,7 @@ def centralidad(n, grafo):
 def estadisticas(grafo):
 	acumulador = 0
 	for vertice in grafo.vertices:
-		vertice = grafo.obtener_vertice(id)
+		vertice = grafo.obtener_vertice(vertice)
 		acumulador += len(grafo.adyacentes_vertice(vertice))
 	promedio = acumulador/len(grafo.vertices)
 	cant_aristas = grafo.cantidad_aris()
