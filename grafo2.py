@@ -44,6 +44,7 @@ class Grafo:
 		if not vertice.iden in self.vertices:
 			self.vertices[vertice.iden] = vertice
 			self.cantidad_vert += 1
+			return True
 		
 	def quitar_vertice(self,vertice):
 		"""Quita un vertice del grafo"""
@@ -61,6 +62,10 @@ class Grafo:
 
 	def agregar_arista(self, vertice, vertice_2):
 		"""Agrega una arista entre dos vertices."""
+		if vertice.iden in self.vertices:
+			vertice = self.vertices.get(vertice.iden, -1)
+		if vertice_2.iden in self.vertices:
+			vertice_2 = self.vertices.get(vertice_2.iden, -1)
 		if vertice.agregar_adyacente(vertice_2) and vertice_2.agregar_adyacente(vertice):
 			self.cantidad_aris += 1
 
@@ -95,7 +100,7 @@ class Grafo:
 	
 	def obtener_vertices(self):
 		"""Devuelve todos los identificadores del grafo."""
-		return vertices.values()
+		return self.vertices.values()
 
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices que tiene el grafo."""
@@ -134,14 +139,22 @@ def generar_grafo(archivo):
 	procesar_archivo(grafo, archivo)
 	return grafo
 
+def estadisticas(grafo):
+	acumulador = 0
+	for vertice in grafo.obtener_vertices():
+		acumulador += len(grafo.adyacentes_vertice(vertice))
+	promedio = acumulador/grafo.cantidad_vertices()
+	densidad = grafo.cantidad_vertices()/grafo.cantidad_aristas()
+	print("Estadisticas:")
+	print("Cantidad de Vertices: {} ".format(grafo.cantidad_vertices()))
+	print("Cantidad de Aristas: {}".format(grafo.cantidad_aristas()))
+	print("Densidad del Grafo: {} ".format(densidad))
+	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
+
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
-	print (grafo.cantidad_aristas())
-	for iden in grafo.obtener_dic_iden():
-		vertice = grafo.obtener_vertice(iden)
-		print(iden, grafo.adyacentes_vertice(vertice))
-
+	estadisticas(grafo)
 
 main()
