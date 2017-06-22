@@ -22,7 +22,7 @@ class Vertice:
 		if vertice.iden in self.adyacentes():
 			return False
 		self.dic_ady[vertice.iden] = vertice
-		vertice.dic_ady[self.iden] = self
+		return True
 
 class Grafo:
 	"""Representa un grafo con operaciones agregar y quitar un vertice, agregar y quitar una arista, 
@@ -47,7 +47,7 @@ class Grafo:
 		"""Agrega un vertice al grafo."""
 		if not vertice.iden in self.vertices:
 			self.vertices[vertice.iden] = vertice
-			self.cantidad_vert =+ 1
+			self.cantidad_vert += 1
 		
 	def quitar_vertice(self,vertice):
 		"""Quita un vertice del grafo"""
@@ -61,11 +61,13 @@ class Grafo:
 
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices del grafo."""
-		return self.cantidad_vert	
+		return self.cantidad_vert()	
 
 	def agregar_arista(self, vertice, vertice_2):
 		"""Agrega una arista entre dos vertices."""
-		vertice.agregar_adyacente(vertice_2)
+		if not vertice.agregar_adyacente(vertice_2):
+			return False
+		vertice_2.agregar_adyacente(vertice)
 		self.cantidad_aris += 1
 
 	def quitar_arista(self,vertice,vertice_2):
@@ -83,21 +85,21 @@ class Grafo:
 
 	def verificar_conexion(self,vertice,vertice_2):
 		"""Verifica si dos vertices están conectados."""
-		return vertice_2 in vertice.adyacentes
+		return vertice_2 in vertice.adyacentes()
 
 	def adyacentes_vertice(self, vertice):
 		"""Devuelve un diccionario conteniendo todos los vertices adyacentes a uno."""
-		return vertice.adyacentes
+		return vertice.adyacentes()
 
 	def vertice_existe(self, vertice):
 		"""Verifica si un vertice existe en un grafo."""
-		return vertice in self.vertices
+		return vertice in self.vertices()
 
 	#def obtener_identificadores(self):
 	
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices que tiene el grafo."""
-		return len(self.vertices)
+		return self.cantidad_vert
 
 
 
@@ -118,10 +120,8 @@ def procesar_archivo(grafo, archivo):
 				id_1, id_2 = linea.rstrip("\n").split("\t")
 				vertice_1 = Vertice(id_1, None)
 				vertice_2 = Vertice(id_2, None)
-				if not vertice_1 in grafo.vertices:
-					grafo.agregar_vertice(vertice_1)
-				if not vertice_2 in grafo.vertices:
-					grafo.agregar_vertice(vertice_2)
+				grafo.agregar_vertice(vertice_1)
+				grafo.agregar_vertice(vertice_2)
 				grafo.agregar_arista(vertice_1, vertice_2)
 	except FileNotFoundError:
 		print("El archivo no fue creado aún.")
@@ -280,16 +280,14 @@ def centralidad(n, grafo):
 
 def estadisticas(grafo):
 	acumulador = 0
-	for vertice in grafo.vertices:
+	for vertice in grafo.obtener_vertices():
 		vertice = grafo.obtener_vertice(vertice)
 		acumulador += len(grafo.adyacentes_vertice(vertice))
-	promedio = acumulador/len(grafo.vertices)
-	cant_aristas = grafo.cantidad_aris()
-	cant_vertices = grafo.cantidad_aris()
-	densidad = cant_vertices/cant_aristas
+	promedio = acumulador/grafo.cantidad_vertices()
+	densidad = grafo.cantidad_vertices()/grafo.cantidad_aristas()
 	print("Estadisticas:")
-	print("Cantidad de Vertices: {} ".format(cant_vertices))
-	print("Cantidad de Aristas: {}".format(cant_aristas))
+	print("Cantidad de Vertices: {} ".format(grafo.cantidad_vertices()))
+	print("Cantidad de Aristas: {}".format(grafo.cantidad_aristas()))
 	print("Densidad del Grafo: {} ".format(densidad))
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))
 
@@ -297,8 +295,7 @@ def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
-	#for vertice in grafo.obtener_vertices():
-	#	print(vertice.adyacentes())
+
 	estadisticas(grafo)
 
 main()
