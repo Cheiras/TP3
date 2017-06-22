@@ -19,7 +19,7 @@ class Vertice:
 
 	def agregar_adyacente(self, vertice):
 		"""Agrega adyacencia entre dos vertices."""
-		if vertice.iden in self.adyacentes():
+		if vertice.iden in self.dic_ady:
 			return False
 		self.dic_ady[vertice.iden] = vertice
 		return True
@@ -65,10 +65,8 @@ class Grafo:
 
 	def agregar_arista(self, vertice, vertice_2):
 		"""Agrega una arista entre dos vertices."""
-		if not vertice.agregar_adyacente(vertice_2):
-			return False
-		vertice_2.agregar_adyacente(vertice)
-		self.cantidad_aris += 1
+		if vertice.agregar_adyacente(vertice_2) and vertice_2.agregar_adyacente(vertice):
+			self.cantidad_aris += 1
 
 	def quitar_arista(self,vertice,vertice_2):
 		"""Quita una arista entre dos vertices."""
@@ -93,7 +91,7 @@ class Grafo:
 
 	def vertice_existe(self, vertice):
 		"""Verifica si un vertice existe en un grafo."""
-		return vertice in self.vertices()
+		return vertice in self.vertices
 
 	#def obtener_identificadores(self):
 	
@@ -295,7 +293,6 @@ def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
-
 	estadisticas(grafo)
 
 main()
