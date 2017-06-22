@@ -16,10 +16,10 @@ class Vertice:
 
 	def agregar_adyacente(self, vertice):
 		"""Agrega adyacencia entre dos vertices."""
-		if vertice.id in self.adyacentes:
+		if vertice.id in self.adyacentes():
 			return False
-		self.adyacentes[vertice.id] = vertice
-		vertice.adyacentes[self.id] = self
+		self.dic_ady[vertice.id] = vertice
+		vertice.dic_ady[self.id] = self
 
 class Grafo:
 	"""Representa un grafo con operaciones agregar y quitar un vertice, agregar y quitar una arista, 
@@ -67,7 +67,7 @@ class Grafo:
 
 	def quitar_arista(self,vertice,vertice_2):
 		"""Quita una arista entre dos vertices."""
-		if not vertice_2 in vertice.adyacentes():
+		if not vertice_2 in vertice.adyacentes:
 			return False
 		vertice.adyacentes.pop(vertice_2.id)
 		vertice_2.adyacentes.pop(vertice.id)
@@ -80,11 +80,11 @@ class Grafo:
 
 	def verificar_conexion(self,vertice,vertice_2):
 		"""Verifica si dos vertices están conectados."""
-		return vertice_2 in vertice.adyacentes()
+		return vertice_2 in vertice.adyacentes
 
-	def adyacentes(self, vertice):
+	def adyacentes_vertice(self, vertice):
 		"""Devuelve un diccionario conteniendo todos los vertices adyacentes a uno."""
-		return vertice.adyacentes()
+		return vertice.adyacentes
 
 	def vertice_existe(self, vertice):
 		"""Verifica si un vertice existe en un grafo."""
@@ -104,10 +104,10 @@ def validar_cantidad(grafo, valor):
 
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
-	with open(archivo, "r") as archivo:
-		try:
+	try:
+		with open(archivo, "r") as archivo:
+			i = 0
 			for linea in archivo:
-				i = 0
 				if (i < 5):
 					i += 1
 					continue
@@ -119,17 +119,18 @@ def procesar_archivo(grafo, archivo):
 				if not vertice_2 in grafo.vertices:
 					grafo.agregar_vertice(vertice_2)
 				grafo.agregar_arista(vertice_1, vertice_2)
-		except FileNotFoundError:
-			print("El archivo no fue creado aún.")
-		except IOError:
-			print("Error al intentar abrir o guardar el archivo.")
-		except ValueError:
-			print("El archivo está vacío.")
+	except FileNotFoundError:
+		print("El archivo no fue creado aún.")
+	except IOError:
+		print("Error al intentar abrir o guardar el archivo.")
+	except ValueError:
+		print("El archivo está vacío.")
 
 def generar_grafo(archivo):
 	"""Función que crea un grafo y le agrega todos los vertices y aristas."""
 	grafo = Grafo()
 	procesar_archivo(grafo, archivo)
+	return grafo
 
 def get_rand_key(diccionario):
 	"""Devuelve una clave aleatoria del diccionario.
@@ -184,7 +185,7 @@ def heap_similares(vertice, largo, cantidad):
     		visitados[origen] = True
     		while len(cola) > 0:
 		        v = cola.desencolar()
-		        for w in grafo.adyacentes(v):
+		        for w in grafo.adyacentes_vertice(v):
 		            if w not in visitados:
 		                visitados[w] = True
 		                padre[w] = v
@@ -199,6 +200,7 @@ def similares(id, n, grafo):
 	if not validar_cantidad(grafo, n):
 		return -1
 	vertice = grafo.obtener_vertice(id)
+	print(vertice)
 	if vertice == -1:
 		return False
 	heap_min = heap_similares(vertice, n, 2000)
@@ -216,7 +218,7 @@ def recomendar(id, n, grafo):
 	heap_min = heap_similares(vertice, n, 2000)
 	for i in range(len(heap_min)):
 		cant, vertice_aux = heapq.heappop(heap_min)
-		if not vertice_aux in grafo.adyacentes(vertice):
+		if not vertice_aux in grafo.adyacentes_vertice(vertice):
 			lista.append(vertice_aux.id)
 	for c in range(len(lista)-1,-1,-1):
 		print("{}\t".format(lista[(i)]))
@@ -275,7 +277,7 @@ def centralidad(n, grafo):
 def estadisticas(grafo):
 	acumulador = 0
 	for vertice in grafo.vertices:
-		acumulador += len(grafo.adyacentes(vertice))
+		acumulador += len(grafo.adyacentes_vertice(vertice))
 	promedio = acumulador/len(grafo.vertices)
 	cant_aristas = grafo.cantidad_aris()
 	cant_vertices = grafo.cantidad_aris()
@@ -290,6 +292,7 @@ def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
+	estadisticas(grafo)
 
 main()
 
