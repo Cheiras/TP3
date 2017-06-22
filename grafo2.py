@@ -3,7 +3,7 @@ import sys
 
 class Vertice:
 	"""Representa un vertice con operaciones ver adyacentes y agregar adyacentes."""
-
+	
 	def __init__(self, iden, label):
 		"""Crea un vertice."""
 		self.iden = iden
@@ -93,10 +93,17 @@ class Grafo:
 		"""Devuelve todos los identificadores del grafo."""
 		return vertices.keys()
 	
+	def obtener_vertices(self):
+		"""Devuelve todos los identificadores del grafo."""
+		return vertices.values()
+
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices que tiene el grafo."""
 		return self.cantidad_vert
 
+##########################################################################################
+##########################################################################################
+##########################################################################################
 
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
