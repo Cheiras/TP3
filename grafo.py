@@ -30,12 +30,22 @@ class Grafo:
 		"""Crea una grafo vacío."""
 		self.vertices = {}
 		self.cantidad
+	def obtener_vertices(self):
+		"""devuelve un diccionario con los vertices del Grafo"""
+		return self.vertices
+
+	def obtener_vertice(self,id):
+		"""Devuelve el Vertice correspondiente al Identificador"""
+		return self.vertices.get(id, -1)
 
 	def agregar_vertice(self, vertice):
 		"""Agrega un vertice al grafo."""
 		if not vertice.id in self.vertices:
 			self.vertices[vertice.id] = vertice
-			cantidad++
+		
+	def cantidad(self):
+		"""Devuelve la cantidad de Aristas del Grafo"""
+		return self.cantidad
 
 	def quitar_vertice(self,vertice):
 		"""Quita un vertice del grafo"""
@@ -44,12 +54,12 @@ class Grafo:
 		for adyacente in vertice.adyacentes:
 			self.vertices[adyacente].adyacentes.pop(vertice.id)
 		self.vertices.pop(vertice.id)
-		self.cantidad--
 		return True
 
 	def agregar_arista(self, vertice, vertice_2):
 		"""Agrega una arista entre dos vertices."""
 		vertice.agregar_adyacente(vertice_2)
+		self.cantidad++
 
 	def quitar_arista(self,vertice,vertice_2):
 		"""Quita una arista entre dos vertices."""
@@ -57,6 +67,7 @@ class Grafo:
 			return False
 		vertice.adyacentes.pop(vertice_2.id)
 		vertice_2.adyacentes.pop(vertice.id)
+		self.cantidad--
 		return True
 
 	def verificar_conexion(self,vertice,vertice_2):
@@ -75,7 +86,7 @@ class Grafo:
 	
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices que tiene el grafo."""
-		return self.cantidad
+		return len(self.vertices)
 
 	def iterar_grafo(self):
 
@@ -102,10 +113,9 @@ def validar_opcion(eleccion, opciones):
 
 def validar_cantidad(grafo, valor):
 	"""Verifica que el parametro pasado sea correcto."""
-	return valor < grafo.cantidad()
+	return valor < grafo.cantidad_vertices()
 
-def obtener_vertice(id, grafo):
-	return grafo.vertices.get(id, -1)
+
 
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
@@ -137,14 +147,21 @@ def generar_grafo(archivo):
 	grafo = Grafo()
 	procesar_archivo(grafo, archivo)
 
-def random_walk(largo, cantidad, vertice):
+def get_rand_key(diccionario):
+	"""Devuelve una clave aleatoria del diccionario.
+	 Pre: El diccionario no esta vacio"""
+	for i in diccionario.keys():
+		return i
+
+def random_walk(largo, cantidad, vertice, grafo):
 	"""Genera un random walk."""
+	if not validar_cantidad(grafo, largo):
+		return -1
 	apariciones = {}
 	for c in range(cantidad):
 		i = 0
 		while i < largo:
-			prob = random(len(vertice.adyacentes()))
-			w = vertice.adyacentes[prob]
+			w = get_rand_key(grafo.obtener_vertices())
 			cant = apariciones.get(w.id, 0)
 			apariciones[w.id] = cant+1  
 			i++
@@ -153,8 +170,13 @@ def random_walk(largo, cantidad, vertice):
 
 def heap_similares(vertice, largo, cantidad):
 	"""Genera un heap de menores de largo dado lleno de vertices similares al recibido por parametro."""
-	//VALIDAR que n*10 no sobrepase la cantidad
-	apariciones = random_walk(largo*10, cantidad, vertice)
+	if not validar_cantidad(grafo, largo):
+		return -1
+	largo = largo*10	
+	if not validar_cantidad(grafo, largo):
+		largo = grafo.cantidad_vertices()	
+
+	apariciones = random_walk(largo, cantidad, vertice)
 	heap_min = []
 	heapq.heapify(heap_min)
 	for vertice in apariciones:
@@ -167,7 +189,7 @@ def heap_similares(vertice, largo, cantidad):
 	return heap_min
 
 def recorrido_BFS(grafo, origen):
-    visitados = {} #diccionario
+    visitados = {}
     padre = {}
     orden = {}
     for v in grafo:
@@ -191,7 +213,9 @@ def recorrido_BFS(grafo, origen):
 
 def similares(id, n, grafo):
 	"""Dado un usuario, encontrar los personajes más similares a este."""
-	vertice = obtener_vertice(id, grafo)
+	if not validar_cantidad(grafo, n):
+		return -1
+	vertice = grafo.obtener_vertice(id)
 	if vertice == -1:
 		return False
 	heap_min = heap_similares(vertice, n, 2000)
@@ -199,15 +223,19 @@ def similares(id, n, grafo):
 		print("{}\t".format(heap_min[i][1]),end=" ")
 
 def recomendar(id, n, grafo):
-	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación, y sea lo más similar a él posible.""" 
-	vertice = obtener_vertice(id, grafo)
+	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación, y sea lo más similar a él posible."""
+	if not validar_cantidad(grafo, n):
+		return -1 
+
+	vertice = grafo.obtener_vertice(id)
 	if vertice == -1:
 		return False
+
 	lista = []
 	heap_min = heap_similares(vertice, n, 2000)
 	for i in range(len(heap_min)):
 		cant, vertice_aux = heapq.heappop(heap_min)
-		if not vertice_aux in vertice.adyacentes():
+		if not vertice_aux in grafo.adyacentes(vertice):
 			lista.append(vertice_aux.id)
 	for c in range(len(lista)-1,-1,-1):
 		print("{}\t".format(lista[(i)]))
@@ -215,15 +243,14 @@ def recomendar(id, n, grafo):
 
 def camino(id_1, id_2, grafo):
 	"""Busca el camino mas corto entre dos vertices."""
-	vertice_1 = obtener_vertice(id, grafo)
+	vertice_1 = grafo.obtener_vertice(id)
 	if vertice_1 == -1:
 		return False
-	vertice_2 = obtener_vertice(id, grafo)
+
+	vertice_2 = grafo.obtener_vertice(id)
 	if vertice_2 == -1:
 		return False	
-	camino, distancia = recorrido_BFS(grafo, vertice_1)
-	if not vertice_2 in camino:
-		return False
+
 	lista_camino = []
 	padre = vertice_2.id
 	lista_camino.append(vertice_2.id)
@@ -234,10 +261,12 @@ def camino(id_1, id_2, grafo):
     	print("{}\t".format(camino[i]))
 
 def centralidad(n, grafo):
-	"""Imprime los n vertices mas centrales del grafo."""
+	if not validar_cantidad(grafo, n):
+		return -1
+
 	heap = []
 	heapq.heapify(heap)
-	for vertice in grafo.vertices()
+	for vertice in grafo.obtener_vertices()
 		a = 0
 		if a == n*10:
 			break
@@ -251,8 +280,9 @@ def centralidad(n, grafo):
 					heapq.heapreplace(heap,heapq.heappop(heap_min))
 
 def distancias(id, grafo):
-	"""Imprime la distancia entre un vertice y todos los vertices con los cuales esta conectado."""
-	vertice = obtener_vertice(id,grafo)
+	vertice = grafo.obtener_vertice(id)
+	if vertice == -1:
+		return False
 	camino, distancia = recorrido_BFS(grafo, vertice)
 	lista_distancias = []
 	for vertice in distancia:
@@ -270,9 +300,15 @@ def estadisticas(grafo):
 	acumulador = 0
 	for vertice in grafo.vertices:
 		acumulador += len(grafo.adyacentes(vertice))
-	promedio = acumulador/grafo.cantidad()
-
-
+	promedio = acumulador/len(grafo.vertices)
+	cant_aristas = grafo.cantidad
+	cant_vertices = len(grafo.vertices)
+	densidad = cant_vertices/cant_aristas
+	print("Estadisticas:")
+    print("Cantidad de Vertices: {} ".format(cant_vertices))
+    print("Cantidad de Aristas: {}".format(cant_aristas))
+    print("Densidad del Grafo: {} ".format(densidad))
+    print("Promedio de grado de entrada de cada vértice: {}".format(promedio))
 
 	
 
