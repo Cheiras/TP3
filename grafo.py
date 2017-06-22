@@ -10,6 +10,9 @@ class Vertice:
 		self.label = label
 		self.dic_ady = {}
 
+	def __str__(self):
+		return(str(self.id))
+
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
 		return self.dic_ady
@@ -104,11 +107,12 @@ def validar_cantidad(grafo, valor):
 
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
+	lineas_de_cabecera = 4
 	try:
 		with open(archivo, "r") as archivo:
 			i = 0
 			for linea in archivo:
-				if (i < 5):
+				if (i <= lineas_de_cabecera):
 					i += 1
 					continue
 				id_1, id_2 = linea.rstrip("\n").split("\t")
@@ -277,6 +281,7 @@ def centralidad(n, grafo):
 def estadisticas(grafo):
 	acumulador = 0
 	for vertice in grafo.vertices:
+		vertice = grafo.obtener_vertice(id)
 		acumulador += len(grafo.adyacentes_vertice(vertice))
 	promedio = acumulador/len(grafo.vertices)
 	cant_aristas = grafo.cantidad_aris()
@@ -292,6 +297,8 @@ def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
+	#for vertice in grafo.obtener_vertices():
+	#	print(vertice.adyacentes())
 	estadisticas(grafo)
 
 main()
