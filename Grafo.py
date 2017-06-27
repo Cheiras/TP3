@@ -64,7 +64,7 @@ class Grafo:
 
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices del grafo."""
-		return self.cantidad_vert()	
+		return self.cantidad_vert
 
 	def agregar_arista(self, vertice, vertice_2):
 		"""Agrega una arista entre dos vertices."""
@@ -108,9 +108,6 @@ class Grafo:
 		"""Devuelve todos los identificadores del grafo."""
 		return list(self.vertices.values())
 
-	def cantidad_vertices(self):
-		"""Devuelve la cantidad de vertices que tiene el grafo."""
-		return self.cantidad_vert
 
 class Nodo:
 	"""Representa un nodo."""
@@ -231,27 +228,31 @@ def heap_similares(vertice, largo, cantidad, grafo):
 	return heap_min
 
 def recorrido_BFS(grafo, origen, destino):
+
 	visitados = {}
 	padre = {}
 	orden = {}
-	cola = Cola()
 	padre[origen] = None
 	orden[origen] = 0
 	q = Cola()
 	q.encolar(origen)
 	visitados[origen] = True
-	while len(cola) > 0:
-		v = cola.desencolar()
-		for w in grafo.adyacentes_vertice(v):
+
+	while not q.esta_vacia():
+		v = q.desencolar()
+		vertice = grafo.obtener_vertice(v)
+		for w in grafo.adyacentes_vertice(vertice):
 			if w not in visitados:
 				visitados[w] = True
 				padre[w] = v
 				orden[w] = orden[v] + 1
-				if(destino):
+				if(destino != None ):
 					if(w == destino):
 						break;
 				q.encolar(w)
+
 	return padre, orden
+
 
 ##########################################################################################
 
@@ -287,16 +288,6 @@ def recomendar(iden, n, grafo):
 	for c in range(len(lista)-1,-1,-1):
 		print("{} ".format(lista[(c)]),end=" ")
 	print("\n")
-
-def camino(id_1, id_2, grafo):
-	"""Busca el camino mas corto entre dos vertices."""
-	vertice_1 = grafo.obtener_vertice(iden)
-	if vertice_1 == -1:
-		return False
-	vertice_2 = grafo.obtener_vertice(iden)
-	if vertice_2 == -1:
-		return False	
-	padre, orden = recorrido_BFS(grafo, vertice_1, vertice_2)
 	
 
 def estadisticas(grafo):
@@ -311,14 +302,33 @@ def estadisticas(grafo):
 	print("Densidad del Grafo: {} ".format(densidad))
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
+def camino(id_1, id_2, grafo):
+	"""Busca el camino mas corto entre dos vertices."""
+	iden = grafo.obtener_identificadores()
+	if not id_1 in iden or not id_2 in iden:
+		print("El vertice no se encuentra en el grafo.")
+		return False
+	padre, orden = recorrido_BFS(grafo, id_1, id_2)
+	camino = []
+	v = id_2
+	while padre[v] != None:
+		camino.append(v)
+		v = padre[v]
+	camino.append(id_1)
+	print("Camino: ",end="")
+	for i in range(len(camino)-1):
+		print("{}->".format(camino[len(camino)-1-i]),end="")
+	print("{}".format(id_2))
+
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
 	start = time.time()
 	grafo = generar_grafo(archivo)
 	end = time.time()
-	print(end-start)
-	estadisticas(grafo)
-	similares("1", 5, grafo)
-	recomendar("5", 4, grafo)
+	#print(end-start)
+	#estadisticas(grafo)
+	#similares("1", 5, grafo)
+	#recomendar("5", 4, grafo)
+	#camino("1","7",grafo)
 main()
