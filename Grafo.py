@@ -191,6 +191,8 @@ def get_rand_vert(lista):
 def validar_cantidad(cantidad, grafo):
 	return cantidad < grafo.cantidad_vertices()
 
+
+
 def random_walk(largo, cantidad, vertice, grafo):
 	"""Genera un random walk."""
 	if not validar_cantidad(largo, grafo):
@@ -319,7 +321,39 @@ def camino(id_1, id_2, grafo):
 	print("{}".format(id_2))
 
 
-def 
+def heap_centrales(heap_min, largo, grafo):
+	"""Genera un heap de menores de largo dado con los vertices centrales del grafo."""
+	globales = {}
+	for i in range(grafo.cantidad_vertices()):
+		vertice = random.choice(grafo.obtener_vertices())
+		apariciones = random_walk(10, 5, vertice, grafo)	
+		for vertice in apariciones.keys():
+			if not vertice in globales:
+				globales[vertice] = apariciones[vertice]
+			else:
+				globales[vertice] = globales[vertice] + apariciones[vertice]
+
+	for vertice in globales.keys():			
+		tupla = (globales[vertice], vertice)
+		if len(heap_min) < largo:
+			heapq.heappush(heap_min, tupla)
+		else:
+			if heap_min[0][0] < tupla[0]:
+				heapq.heapreplace(heap_min,tupla)
+
+
+
+
+def centralidad(grafo, n):
+	"""De menor a mayor. Con Random Walks"""
+	heap = []
+	heapq.heapify(heap)
+	heap_centrales(heap,n, grafo)
+	for i in range(len(heap)):
+		print("{} ".format(heap[i][1]),end=" ")
+	print("\n")
+	
+
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
@@ -330,5 +364,7 @@ def main():
 	#estadisticas(grafo)
 	#similares("1", 5, grafo)
 	#recomendar("5", 4, grafo)
-	camino("123","5",grafo)
+	#camino("123","5",grafo)
+	centralidad(grafo, 10)
+
 main()
