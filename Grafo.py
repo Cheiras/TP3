@@ -158,8 +158,8 @@ class Cola:
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
 	lineas_de_cabecera = 4
-	try:
-		with open(archivo, "r") as archivo:
+	with open(archivo, "r") as archivo:
+		try:
 			i = 0
 			for linea in archivo:
 				if (i <= lineas_de_cabecera):
@@ -171,12 +171,10 @@ def procesar_archivo(grafo, archivo):
 				grafo.agregar_vertice(vertice_1)
 				grafo.agregar_vertice(vertice_2)
 				grafo.agregar_arista(vertice_1, vertice_2)
-	except FileNotFoundError:
-		print("El archivo no fue creado aún.")
-	except IOError:
-		print("Error al intentar abrir o guardar el archivo.")
-	except ValueError:
-		print("El archivo está vacío.")
+		except FileNotFoundError:
+			print("El archivo no fue creado aún.")
+		except IOError:
+			print("Error al intentar abrir o guardar el archivo.")
 
 def generar_grafo(archivo):
 	"""Función que crea un grafo y le agrega todos los vertices y aristas."""
@@ -320,6 +318,8 @@ def camino(id_1, id_2, grafo):
 		print("{}->".format(camino[len(camino)-1-i]),end="")
 	print("{}".format(id_2))
 
+
+def 
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
@@ -330,5 +330,5 @@ def main():
 	#estadisticas(grafo)
 	#similares("1", 5, grafo)
 	#recomendar("5", 4, grafo)
-	#camino("1","7",grafo)
+	camino("123","5",grafo)
 main()
