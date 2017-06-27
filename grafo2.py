@@ -1,5 +1,6 @@
-from random import *
+import random
 import sys
+import heapq
 
 class Vertice:
 	"""Representa un vertice con operaciones ver adyacentes y agregar adyacentes."""
@@ -9,6 +10,9 @@ class Vertice:
 		self.iden = iden
 		self.label = label
 		self.dic_ady = {}
+
+	#def __repr__(self):
+	#	return self.iden
 
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
@@ -96,11 +100,11 @@ class Grafo:
 
 	def obtener_identificadores(self):
 		"""Devuelve todos los identificadores del grafo."""
-		return vertices.keys()
+		return list(self.vertices.keys())
 	
 	def obtener_vertices(self):
 		"""Devuelve todos los identificadores del grafo."""
-		return self.vertices.values()
+		return list(self.vertices.values())
 
 	def cantidad_vertices(self):
 		"""Devuelve la cantidad de vertices que tiene el grafo."""
@@ -139,6 +143,62 @@ def generar_grafo(archivo):
 	procesar_archivo(grafo, archivo)
 	return grafo
 
+def get_rand_vert(lista):
+	"""Devuelve una clave aleatoria del diccionario.
+	Pre: El diccionario no esta vacio"""
+	posicion = random.randint(0, len(lista)-1)
+	return lista[posicion]
+
+def validar_cantidad(cantidad, grafo):
+	return cantidad < grafo.cantidad_vertices()
+
+def random_walk(largo, cantidad, vertice, grafo):
+	"""Genera un random walk."""
+	if not validar_cantidad(largo, grafo):
+		return -1
+	apariciones = {}
+	v = vertice
+	for c in range(cantidad):
+		i = 0
+		while i < largo:
+			w = get_rand_vert(list(grafo.adyacentes_vertice(v).values()))
+			cant = apariciones.get(w.iden, 0)
+			apariciones[w.iden] = cant+1  
+			i += 1
+			v = w
+	return apariciones
+
+def heap_similares(vertice, largo, cantidad, grafo):
+	"""Genera un heap de menores de largo dado lleno de vertices similares al recibido por parametro."""
+	cantidad = cantidad*10	
+	if not validar_cantidad(cantidad, grafo):
+		cantidad = grafo.cantidad_vertices()	
+	apariciones = random_walk(largo, cantidad, vertice, grafo)
+	heap_min = []
+	heapq.heapify(heap_min)
+	for vertice in list(apariciones.keys()):
+		vertice = grafo.obtener_vertice(vertice)
+		tupla = (apariciones[vertice.iden], vertice.iden)
+		if len(heap_min) < largo:
+			heapq.heappush(heap_min, tupla)
+		else:
+			if heap_min[0][0] < tupla[0]:
+				heapq.heapreplace(heap_min,tupla)
+	return heap_min
+
+def similares(iden, n, grafo):
+	"""Dado un usuario, encontrar los personajes más similares a este."""
+	if not validar_cantidad(n, grafo):
+		return -1
+	vertice = grafo.obtener_vertice(iden)
+	if vertice == -1:
+		print("El vertice no se encuentra en el grafo.")
+		return False
+	heap_min = heap_similares(vertice, n, 2000, grafo)
+	for i in range(len(heap_min)):
+		print("{} ".format(heap_min[i][1]),end=" ")
+	print("\n")
+
 def estadisticas(grafo):
 	acumulador = 0
 	for vertice in grafo.obtener_vertices():
@@ -156,5 +216,6 @@ def main():
 	archivo = input("Ingrese el nombre del archivo: ")
 	grafo = generar_grafo(archivo)
 	estadisticas(grafo)
+	similares("1", 5, grafo)
 
 main()
