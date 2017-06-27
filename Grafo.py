@@ -230,7 +230,7 @@ def heap_similares(vertice, largo, cantidad, grafo):
 				heapq.heapreplace(heap_min,tupla)
 	return heap_min
 
-def recorrido_BFS(grafo, origen):
+def recorrido_BFS(grafo, origen, destino):
 	visitados = {}
 	padre = {}
 	orden = {}
@@ -241,13 +241,16 @@ def recorrido_BFS(grafo, origen):
 	q.encolar(origen)
 	visitados[origen] = True
 	while len(cola) > 0:
-	v = cola.desencolar()
-	for w in grafo.adyacentes_vertice(v):
-		if w not in visitados:
-			visitados[w] = True
-			padre[w] = v
-			orden[w] = orden[v] + 1
-			q.encolar(w)
+		v = cola.desencolar()
+		for w in grafo.adyacentes_vertice(v):
+			if w not in visitados:
+				visitados[w] = True
+				padre[w] = v
+				orden[w] = orden[v] + 1
+				if(destino):
+					if(w == destino):
+						break;
+				q.encolar(w)
 	return padre, orden
 
 ##########################################################################################
@@ -284,6 +287,17 @@ def recomendar(iden, n, grafo):
 	for c in range(len(lista)-1,-1,-1):
 		print("{} ".format(lista[(c)]),end=" ")
 	print("\n")
+
+def camino(id_1, id_2, grafo):
+	"""Busca el camino mas corto entre dos vertices."""
+	vertice_1 = grafo.obtener_vertice(iden)
+	if vertice_1 == -1:
+		return False
+	vertice_2 = grafo.obtener_vertice(iden)
+	if vertice_2 == -1:
+		return False	
+	padre, orden = recorrido_BFS(grafo, vertice_1, vertice_2)
+	
 
 def estadisticas(grafo):
 	acumulador = 0
