@@ -1,6 +1,7 @@
 import random
 import sys
 import heapq
+import time
 
 class Vertice:
 	"""Representa un vertice con operaciones ver adyacentes y agregar adyacentes."""
@@ -25,9 +26,10 @@ class Vertice:
 			return True
 
 class Grafo:
-	"""Representa un grafo con operaciones agregar y quitar un vertice, agregar y quitar una arista, 
-	obtener adyacencias, verificar si dos vertices son adyacentes, verificar si un vertice existe,
-	obtener la cantidad de vertices, obtener los identificadores del grafo e iterar.."""
+	"""Representa un grafo con operaciones agregar y quitar un vertice, agregar y quitar 
+	una arista, obtener adyacencias, verificar si dos vertices son adyacentes, verificar
+	 si un vertice existe,obtener la cantidad de vertices, obtener los identificadores
+	  del grafo e iterar.."""
 
 	def __init__(self):
 		"""Crea una grafo vacío."""
@@ -169,7 +171,8 @@ def random_walk(largo, cantidad, vertice, grafo):
 	return apariciones
 
 def heap_similares(vertice, largo, cantidad, grafo):
-	"""Genera un heap de menores de largo dado lleno de vertices similares al recibido por parametro."""
+	"""Genera un heap de menores de largo dado lleno de vertices similares 
+	al recibido por parametro."""
 	cantidad = cantidad*10	
 	if not validar_cantidad(cantidad, grafo):
 		cantidad = grafo.cantidad_vertices()	
@@ -177,14 +180,34 @@ def heap_similares(vertice, largo, cantidad, grafo):
 	heap_min = []
 	heapq.heapify(heap_min)
 	for vertice in list(apariciones.keys()):
-		vertice = grafo.obtener_vertice(vertice)
-		tupla = (apariciones[vertice.iden], vertice.iden)
+		tupla = (apariciones[vertice], vertice)
 		if len(heap_min) < largo:
 			heapq.heappush(heap_min, tupla)
 		else:
 			if heap_min[0][0] < tupla[0]:
 				heapq.heapreplace(heap_min,tupla)
 	return heap_min
+
+"""def recorrido_BFS(grafo, origen):
+	visitados = {}
+	padre = {}
+	orden = {}
+	padre[origen] = None
+	orden[origen] = 0
+	q = Cola()
+	q.encolar(origen)
+	visitados[origen] = True
+	while len(cola) > 0:
+	v = cola.desencolar()
+	for w in grafo.adyacentes_vertice(v):
+		if w not in visitados:
+			visitados[w] = True
+			padre[w] = v
+			orden[w] = orden[v] + 1
+			q.encolar(w)
+	return padre, orden"""
+
+##########################################################################################
 
 def similares(iden, n, grafo):
 	"""Dado un usuario, encontrar los personajes más similares a este."""
@@ -197,6 +220,26 @@ def similares(iden, n, grafo):
 	heap_min = heap_similares(vertice, n, 2000, grafo)
 	for i in range(len(heap_min)):
 		print("{} ".format(heap_min[i][1]),end=" ")
+	print("\n")
+
+def recomendar(iden, n, grafo):
+	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación,
+	 y sea lo más similar a él posible. Si la cantidad de similares < n, imprime la cantidad maxima."""
+	if not validar_cantidad(n, grafo):
+		return -1 
+	vertice = grafo.obtener_vertice(iden)
+	if vertice == -1:
+		return False
+	lista = []
+	heap_min = heap_similares(vertice, n*2, 2000, grafo)
+	i = 0
+	while(i < n):
+		cant, vertice_aux = heapq.heappop(heap_min)
+		if not vertice_aux in list(grafo.adyacentes_vertice(vertice).keys()):
+			lista.append(vertice_aux)
+			i += 1
+	for c in range(len(lista)-1,-1,-1):
+		print("{} ".format(lista[(c)]),end=" ")
 	print("\n")
 
 def estadisticas(grafo):
@@ -214,8 +257,11 @@ def estadisticas(grafo):
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
+	start = time.time()
 	grafo = generar_grafo(archivo)
+	end = time.time()
+	print(end-start)
 	estadisticas(grafo)
 	similares("1", 5, grafo)
-
+	recomendar("5", 4, grafo)
 main()
