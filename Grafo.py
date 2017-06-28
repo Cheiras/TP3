@@ -173,13 +173,17 @@ def procesar_archivo(grafo, archivo):
 				grafo.agregar_arista(vertice_1, vertice_2)
 	except FileNotFoundError:
 		print("El archivo no fue creado aún.")
+		return False
 	except IOError:
 		print("Error al intentar abrir o guardar el archivo.")
+		return False
+	return True
 
 def generar_grafo(archivo):
 	"""Función que crea un grafo y le agrega todos los vertices y aristas."""
 	grafo = Grafo()
-	procesar_archivo(grafo, archivo)
+	if not procesar_archivo(grafo, archivo):
+		return False
 	return grafo
 
 def get_rand_vert(lista):
@@ -199,6 +203,7 @@ def validar_cantidad(cantidad, grafo):
 
 def verificar_elecciones(vertice, n, grafo):
 	if not validar_cantidad(n, grafo):
+		print("Ingreso una cantidad mayor a la del grafo.")
 		return False
 	return validar_vertice(vertice, grafo)
 
@@ -263,6 +268,30 @@ def recorrido_BFS(grafo, origen, destino):
 
 	return padre, orden
 
+def verificar_parametros(comando, ingreso):
+	if len(ingreso) == 0 or len(ingreso) > 3:
+		print("Ingresó una cantidad incorrecta de parametros.")
+		return False
+	if (comando == 0):
+		print("El comando ingresado es incorrecto.")
+		return False
+	if (comando == 1 or comando == 2 or comando == 3):
+		if (len(ingreso) != 3):
+			print("Ingresó una cantidad incorrecta de parametros.")
+			return False
+	if (comando == 4 or comando == 5):
+		if (len(ingreso) != 2):
+			print("Ingresó una cantidad incorrecta de parametros.")
+			return False
+	if (comando == 6 or comando == 7 or comando == 8):
+		if (len(ingreso) != 1):
+			print("Ingresó una cantidad incorrecta de parametros.")
+			return False
+	return True
+
+def es_numero(parametro):
+	return parametro.isdigit()
+
 ##########################################################################################
 
 def similares(iden, n, grafo):
@@ -300,11 +329,10 @@ def recomendar(iden, n, grafo):
 	
 def camino(id_1, id_2, grafo):
 	"""Busca el camino mas corto entre dos vertices."""
-	iden = grafo.obtener_identificadores()
 	vertice = grafo.obtener_vertice(id_1)
 	vertice_2 = grafo.obtener_vertice(id_2)
 	if vertice == -1 or vertice_2 == -1:
-		print("Algín vertice no se encuentra en el grafo.")
+		print("Algún vertice no se encuentra en el grafo.")
 		return False
 	padre, orden = recorrido_BFS(grafo, id_1, id_2)
 	camino = []
@@ -321,7 +349,7 @@ def camino(id_1, id_2, grafo):
 def centralidad(grafo, n):
 	"""Obtiene lo "n" vertices con mayor influencia del grafo utilizando random walks."""
 	globales = {}
-	for i in range(n*100):
+	for i in range(n*50):
 		vertice = random.choice(grafo.obtener_vertices())#check O(n)
 		apariciones = random_walk(10, 5, vertice, grafo)	
 		for vertice in apariciones.keys():
@@ -360,35 +388,42 @@ def estadisticas(grafo):
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
 
+def menu(grafo):
+	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
+	while True:
+		ingreso = input("Ingrese el comando deseado o 'S' para salir: ").split(" ")
+		comando = opciones.get(ingreso[0].lower(), 0)
+		if not verificar_parametros(comando, ingreso):
+			menu(grafo)
+		for i in range (len(ingreso)-1, 0, -1):
+			parametro = ingreso[i]
+			if not es_numero(parametro):
+				print("Los parametros deben ser dígitos.")
+				menu(grafo)
+		if(comando == 1):
+			similares(ingreso[1], int(ingreso[2]), grafo)
+		if(comando == 2):
+			recomendar(ingreso[1], int(ingreso[2]), grafo)
+		if(comando == 3):
+			camino(ingreso[1], ingreso[2], grafo)
+		if(comando == 4):
+			centralidad(grafo, int(ingreso[1]))
+		if(comando == 5):
+			distancia(grafo, ingreso[1])
+		if(comando == 6):
+			estadisticas(grafo)
+		if(comando == 7):
+			break;
+		if(comando == 8):
+			sys.exit()
+
 def main():
 	"""Función que corre el programa."""
 	archivo = input("Ingrese el nombre del archivo: ")
-	start = time.time()
+	print("Generando grafo.")
 	grafo = generar_grafo(archivo)
-	end = time.time()
-	print("Tiempo generar grafo: ",end-start)
-	start = time.time()
-	estadisticas(grafo)
-	end = time.time()
-	print("Tiempo estadisticas: ",end-start)
-	start = time.time()
-	similares("1", 5, grafo)
-	end = time.time()
-	print("Tiempo similares: ",end-start)
-	start = time.time()
-	recomendar("5", 4, grafo)
-	end = time.time()
-	print("Tiempo recomendar: ",end-start)
-	start = time.time()
-	camino("123","5",grafo)
-	end = time.time()
-	print("Tiempo camino: ",end-start)
-	start = time.time()
-	centralidad(grafo, 3)
-	end = time.time()
-	print("Tiempo centralidad: ",end-start)
-	start = time.time()
-	distancia(grafo, "9")
-	end = time.time()
-	print("Tiempo distancia: ",end-start)
+	print("Grafo generado.")
+	if not grafo:
+		sys.exit()
+	menu(grafo)
 main()
