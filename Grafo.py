@@ -228,7 +228,6 @@ def heap_similares(vertice, largo, cantidad, grafo):
 	return heap_min
 
 def recorrido_BFS(grafo, origen, destino):
-
 	visitados = {}
 	padre = {}
 	orden = {}
@@ -324,8 +323,8 @@ def camino(id_1, id_2, grafo):
 def heap_centrales(heap_min, largo, grafo):
 	"""Genera un heap de menores de largo dado con los vertices centrales del grafo."""
 	globales = {}
-	for i in range(grafo.cantidad_vertices()):
-		vertice = random.choice(grafo.obtener_vertices())
+	for i in range(1000):
+		vertice = random.choice(grafo.obtener_vertices())#check O(n)
 		apariciones = random_walk(10, 5, vertice, grafo)	
 		for vertice in apariciones.keys():
 			if not vertice in globales:
@@ -345,14 +344,35 @@ def heap_centrales(heap_min, largo, grafo):
 
 
 def centralidad(grafo, n):
-	"""De menor a mayor. Con Random Walks"""
+	""" Obtiene lo "n" vertices con mayor influencia del grafo. Resultado aproximado."""
+
 	heap = []
 	heapq.heapify(heap)
-	heap_centrales(heap,n, grafo)
+	heap_centrales(heap, n, grafo)
 	for i in range(len(heap)):
 		print("{} ".format(heap[i][1]),end=" ")
 	print("\n")
-	
+
+
+
+def distancia(grafo, iden):
+	""" Obtiene la cantidad de elementos que hay para cada distancia del vertice ingresado """
+
+	padre, orden = recorrido_BFS(grafo, iden, None)
+	distancias = {}
+	for vertice in orden.keys():
+		if(orden[vertice] == 0):
+			continue
+		if not orden[vertice] in distancias:
+			distancias[orden[vertice]] = []
+		distancias[orden[vertice]].append(vertice)
+	lista = list(distancias.keys())#chequear tiempo de ejecucion
+	lista.sort()#chequear o idear alternativa para tener todo ordenado
+	for i, elemento in enumerate(lista):
+		print("Distancia {}: {}".format(elemento, len(distancias[elemento])))
+
+
+
 
 def main():
 	"""Función que corre el programa."""
@@ -365,6 +385,6 @@ def main():
 	#similares("1", 5, grafo)
 	#recomendar("5", 4, grafo)
 	#camino("123","5",grafo)
-	centralidad(grafo, 10)
-
+	#centralidad(grafo, 3)
+	distancia(grafo, "9")
 main()
