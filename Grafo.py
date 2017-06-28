@@ -158,8 +158,8 @@ class Cola:
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
 	lineas_de_cabecera = 4
-	with open(archivo, "r") as archivo:
-		try:
+	try:
+		with open(archivo, "r") as archivo:
 			i = 0
 			for linea in archivo:
 				if (i <= lineas_de_cabecera):
@@ -171,10 +171,10 @@ def procesar_archivo(grafo, archivo):
 				grafo.agregar_vertice(vertice_1)
 				grafo.agregar_vertice(vertice_2)
 				grafo.agregar_arista(vertice_1, vertice_2)
-		except FileNotFoundError:
-			print("El archivo no fue creado aún.")
-		except IOError:
-			print("Error al intentar abrir o guardar el archivo.")
+	except FileNotFoundError:
+		print("El archivo no fue creado aún.")
+	except IOError:
+		print("Error al intentar abrir o guardar el archivo.")
 
 def generar_grafo(archivo):
 	"""Función que crea un grafo y le agrega todos los vertices y aristas."""
@@ -188,10 +188,25 @@ def get_rand_vert(lista):
 	posicion = random.randint(0, len(lista)-1)
 	return lista[posicion]
 
+def validar_vertice(vertice, grafo):
+	if vertice == -1:
+		print("El vertice no se encuentra en el grafo.")
+		return False
+	return True
+
 def validar_cantidad(cantidad, grafo):
 	return cantidad < grafo.cantidad_vertices()
 
+def verificar_elecciones(vertice, n, grafo):
+	if not validar_cantidad(n, grafo):
+		return False
+	return validar_vertice(vertice, grafo)
 
+def establecer_cantidad(n, grafo):
+	cantidad = n*100
+	if not validar_cantidad(cantidad, grafo):
+		cantidad = grafo.cantidad_vertices()
+	return cantidad
 
 def random_walk(largo, cantidad, vertice, grafo):
 	"""Genera un random walk."""
@@ -209,17 +224,13 @@ def random_walk(largo, cantidad, vertice, grafo):
 			v = w
 	return apariciones
 
-def heap_similares(vertice, largo, cantidad, grafo):
+def crear_heap_menores(diccionario, largo):
 	"""Genera un heap de menores de largo dado lleno de vertices similares 
 	al recibido por parametro."""
-	cantidad = cantidad*10	
-	if not validar_cantidad(cantidad, grafo):
-		cantidad = grafo.cantidad_vertices()	
-	apariciones = random_walk(largo, cantidad, vertice, grafo)
 	heap_min = []
 	heapq.heapify(heap_min)
-	for vertice in list(apariciones.keys()):
-		tupla = (apariciones[vertice], vertice)
+	for vertice in list(diccionario.keys()):
+		tupla = (diccionario[vertice], vertice)
 		if len(heap_min) < largo:
 			heapq.heappush(heap_min, tupla)
 		else:
@@ -252,18 +263,16 @@ def recorrido_BFS(grafo, origen, destino):
 
 	return padre, orden
 
-
 ##########################################################################################
 
 def similares(iden, n, grafo):
 	"""Dado un usuario, encontrar los personajes más similares a este."""
-	if not validar_cantidad(n, grafo):
-		return -1
 	vertice = grafo.obtener_vertice(iden)
-	if vertice == -1:
-		print("El vertice no se encuentra en el grafo.")
+	if not verificar_elecciones(vertice, n, grafo):
 		return False
-	heap_min = heap_similares(vertice, n, 2000, grafo)
+	cantidad = establecer_cantidad(n, grafo)
+	apariciones = random_walk(cantidad, 30, vertice, grafo)
+	heap_min = crear_heap_menores(apariciones, n)
 	for i in range(len(heap_min)):
 		print("{} ".format(heap_min[i][1]),end=" ")
 	print("\n")
@@ -271,14 +280,15 @@ def similares(iden, n, grafo):
 def recomendar(iden, n, grafo):
 	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación,
 	 y sea lo más similar a él posible. Si la cantidad de similares < n, imprime la cantidad maxima."""
-	if not validar_cantidad(n, grafo):
-		return -1 
 	vertice = grafo.obtener_vertice(iden)
-	if vertice == -1:
+	if not verificar_elecciones(vertice, n, grafo):
 		return False
-	lista = []
-	heap_min = heap_similares(vertice, n*2, 2000, grafo)
+	cantidad = n*100
+	cantidad = establecer_cantidad(n, grafo)
+	apariciones = random_walk(cantidad, 30, vertice, grafo)
+	heap_min = crear_heap_menores(apariciones, n*2)
 	i = 0
+	lista = []
 	while(i < n):
 		cant, vertice_aux = heapq.heappop(heap_min)
 		if not vertice_aux in list(grafo.adyacentes_vertice(vertice).keys()):
@@ -288,24 +298,13 @@ def recomendar(iden, n, grafo):
 		print("{} ".format(lista[(c)]),end=" ")
 	print("\n")
 	
-
-def estadisticas(grafo):
-	acumulador = 0
-	for vertice in grafo.obtener_vertices():
-		acumulador += len(grafo.adyacentes_vertice(vertice))
-	promedio = acumulador/grafo.cantidad_vertices()
-	densidad = grafo.cantidad_vertices()/grafo.cantidad_aristas()
-	print("Estadisticas:")
-	print("Cantidad de Vertices: {} ".format(grafo.cantidad_vertices()))
-	print("Cantidad de Aristas: {}".format(grafo.cantidad_aristas()))
-	print("Densidad del Grafo: {} ".format(densidad))
-	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
-
 def camino(id_1, id_2, grafo):
 	"""Busca el camino mas corto entre dos vertices."""
 	iden = grafo.obtener_identificadores()
-	if not id_1 in iden or not id_2 in iden:
-		print("El vertice no se encuentra en el grafo.")
+	vertice = grafo.obtener_vertice(id_1)
+	vertice_2 = grafo.obtener_vertice(id_2)
+	if vertice == -1 or vertice_2 == -1:
+		print("Algín vertice no se encuentra en el grafo.")
 		return False
 	padre, orden = recorrido_BFS(grafo, id_1, id_2)
 	camino = []
@@ -319,45 +318,22 @@ def camino(id_1, id_2, grafo):
 		print("{}->".format(camino[len(camino)-1-i]),end="")
 	print("{}".format(id_2))
 
-
-def heap_centrales(heap_min, largo, grafo):
-	"""Genera un heap de menores de largo dado con los vertices centrales del grafo."""
+def centralidad(grafo, n):
+	"""Obtiene lo "n" vertices con mayor influencia del grafo utilizando random walks."""
 	globales = {}
-	for i in range(1000):
+	for i in range(n*100):
 		vertice = random.choice(grafo.obtener_vertices())#check O(n)
 		apariciones = random_walk(10, 5, vertice, grafo)	
 		for vertice in apariciones.keys():
-			if not vertice in globales:
-				globales[vertice] = apariciones[vertice]
-			else:
-				globales[vertice] = globales[vertice] + apariciones[vertice]
-
-	for vertice in globales.keys():			
-		tupla = (globales[vertice], vertice)
-		if len(heap_min) < largo:
-			heapq.heappush(heap_min, tupla)
-		else:
-			if heap_min[0][0] < tupla[0]:
-				heapq.heapreplace(heap_min,tupla)
-
-
-
-
-def centralidad(grafo, n):
-	""" Obtiene lo "n" vertices con mayor influencia del grafo. Resultado aproximado."""
-
-	heap = []
-	heapq.heapify(heap)
-	heap_centrales(heap, n, grafo)
+			apariciones = globales.get(vertice, 0) + 1
+			globales[vertice] = apariciones
+	heap = crear_heap_menores(globales, n)
 	for i in range(len(heap)):
 		print("{} ".format(heap[i][1]),end=" ")
 	print("\n")
 
-
-
 def distancia(grafo, iden):
-	""" Obtiene la cantidad de elementos que hay para cada distancia del vertice ingresado """
-
+	""" Obtiene la cantidad de elementos que hay para cada distancia del vertice ingresado."""
 	padre, orden = recorrido_BFS(grafo, iden, None)
 	distancias = {}
 	for vertice in orden.keys():
@@ -371,7 +347,17 @@ def distancia(grafo, iden):
 	for i, elemento in enumerate(lista):
 		print("Distancia {}: {}".format(elemento, len(distancias[elemento])))
 
-
+def estadisticas(grafo):
+	acumulador = 0
+	for vertice in grafo.obtener_vertices():
+		acumulador += len(grafo.adyacentes_vertice(vertice))
+	promedio = acumulador/grafo.cantidad_vertices()
+	densidad = grafo.cantidad_vertices()/grafo.cantidad_aristas()
+	print("Estadisticas:")
+	print("Cantidad de Vertices: {} ".format(grafo.cantidad_vertices()))
+	print("Cantidad de Aristas: {}".format(grafo.cantidad_aristas()))
+	print("Densidad del Grafo: {} ".format(densidad))
+	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
 
 def main():
@@ -380,11 +366,29 @@ def main():
 	start = time.time()
 	grafo = generar_grafo(archivo)
 	end = time.time()
-	#print(end-start)
-	#estadisticas(grafo)
-	#similares("1", 5, grafo)
-	#recomendar("5", 4, grafo)
-	#camino("123","5",grafo)
-	#centralidad(grafo, 3)
+	print("Tiempo generar grafo: ",end-start)
+	start = time.time()
+	estadisticas(grafo)
+	end = time.time()
+	print("Tiempo estadisticas: ",end-start)
+	start = time.time()
+	similares("1", 5, grafo)
+	end = time.time()
+	print("Tiempo similares: ",end-start)
+	start = time.time()
+	recomendar("5", 4, grafo)
+	end = time.time()
+	print("Tiempo recomendar: ",end-start)
+	start = time.time()
+	camino("123","5",grafo)
+	end = time.time()
+	print("Tiempo camino: ",end-start)
+	start = time.time()
+	centralidad(grafo, 3)
+	end = time.time()
+	print("Tiempo centralidad: ",end-start)
+	start = time.time()
 	distancia(grafo, "9")
+	end = time.time()
+	print("Tiempo distancia: ",end-start)
 main()
