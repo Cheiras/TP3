@@ -386,7 +386,7 @@ def centralidad(grafo, n):
 	FACTOR_DE_CENTRALIDAD = 50
 	globales = {}
 	for i in range(n*FACTOR_DE_CENTRALIDAD):
-		vertice = random.choice(grafo.obtener_vertices())#check O(n)
+		vertice = random.choice(grafo.obtener_vertices())
 		apariciones = random_walk(CANT_RAN_WALKS, LARGO_RAN_WALKS, vertice, grafo)	
 		for vertice in apariciones.keys():
 			apariciones = globales.get(vertice, 0) + 1
@@ -406,8 +406,8 @@ def distancia(grafo, iden):
 		if not orden[vertice] in distancias:
 			distancias[orden[vertice]] = []
 		distancias[orden[vertice]].append(vertice)
-	lista = list(distancias.keys())#chequear tiempo de ejecucion
-	lista.sort()#chequear o idear alternativa para tener todo ordenado
+	lista = list(distancias.keys())
+	lista.sort()
 	for i, elemento in enumerate(lista):
 		print("Distancia {}: {}".format(elemento, len(distancias[elemento])))
 
