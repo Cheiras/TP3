@@ -12,8 +12,8 @@ class Vertice:
 		self.label = label
 		self.dic_ady = {}
 
-	#def __repr__(self):
-	#	return self.iden
+	def __repr__(self):
+		return self.iden
 
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
@@ -248,7 +248,7 @@ def crear_heap_menores(diccionario, largo):
 	return heap_min
 
 def recorrido_BFS(grafo, origen, destino):
-	"""Hace recorrido BFS desde un origen hasta un destino."""
+	"""Hace recorrido BFS desde un origen hasta un destino si se desea agregarle."""
 	visitados = {}
 	padre = {}
 	orden = {}
@@ -296,6 +296,36 @@ def verificar_parametros(comando, ingreso):
 def es_numero(parametro):
 	return parametro.isdigit()
 
+def menu(grafo):
+	"""Corre el menú que interactúa con el usuario."""
+	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
+	while True:
+		ingreso = input("Ingrese el comando deseado o 'S' para salir: ").split(" ")
+		comando = opciones.get(ingreso[0].lower(), 0)
+		if not verificar_parametros(comando, ingreso):
+			menu(grafo)
+		for i in range (len(ingreso)-1, 0, -1):
+			parametro = ingreso[i]
+			if not es_numero(parametro):
+				print("Los parametros deben ser dígitos.")
+				menu(grafo)
+		if(comando == 1):
+			similares(ingreso[1], int(ingreso[2]), grafo)
+		if(comando == 2):
+			recomendar(ingreso[1], int(ingreso[2]), grafo)
+		if(comando == 3):
+			camino(ingreso[1], ingreso[2], grafo)
+		if(comando == 4):
+			centralidad(grafo, int(ingreso[1]))
+		if(comando == 5):
+			distancia(grafo, ingreso[1])
+		if(comando == 6):
+			estadisticas(grafo)
+		if(comando == 7):
+			comunidades(grafo)
+		if(comando == 8):
+			sys.exit()
+
 ##########################################################################################
 
 def similares(iden, n, grafo):
@@ -314,7 +344,7 @@ def similares(iden, n, grafo):
 def recomendar(iden, n, grafo):
 	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación,
 	 y sea lo más similar a él posible. Si la cantidad de similares < n, imprime la cantidad maxima."""
-	 LARGO_RAN_WALKS = 30
+	LARGO_RAN_WALKS = 30
 	vertice = grafo.obtener_vertice(iden)
 	if not verificar_elecciones(vertice, n, grafo):
 		return False
@@ -397,35 +427,21 @@ def estadisticas(grafo):
 	print("Densidad del Grafo: {} ".format(densidad))
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
-def menu(grafo):
-	"""Corre el menú que interactúa con el usuario."""
-	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
-	while True:
-		ingreso = input("Ingrese el comando deseado o 'S' para salir: ").split(" ")
-		comando = opciones.get(ingreso[0].lower(), 0)
-		if not verificar_parametros(comando, ingreso):
-			menu(grafo)
-		for i in range (len(ingreso)-1, 0, -1):
-			parametro = ingreso[i]
-			if not es_numero(parametro):
-				print("Los parametros deben ser dígitos.")
-				menu(grafo)
-		if(comando == 1):
-			similares(ingreso[1], int(ingreso[2]), grafo)
-		if(comando == 2):
-			recomendar(ingreso[1], int(ingreso[2]), grafo)
-		if(comando == 3):
-			camino(ingreso[1], ingreso[2], grafo)
-		if(comando == 4):
-			centralidad(grafo, int(ingreso[1]))
-		if(comando == 5):
-			distancia(grafo, ingreso[1])
-		if(comando == 6):
-			estadisticas(grafo)
-		if(comando == 7):
-			break;
-		if(comando == 8):
-			sys.exit()
+def comunidades(grafo):
+	for vertice in grafo.obtener_vertices():
+		labels = {}
+		mas_aparece = 0
+		label_mas_presente = 0
+		for adyacente in list(grafo.adyacentes_vertice(vertice).values()):
+			apariciones = labels.get(adyacente.label, 0)
+			labels[adyacente.label] = apariciones + 1
+		for label in labels:
+			if labels[label] > mas_aparece:
+				mas_aparece = labels[label]
+				label_mas_presente = label
+		vertice.label = label_mas_presente
+
+
 
 def main():
 	"""Función que corre el programa."""
