@@ -293,9 +293,6 @@ def verificar_parametros(comando, ingreso):
 			return False
 	return True
 
-def es_numero(parametro):
-	return parametro.isdigit()
-
 def menu(grafo):
 	"""Corre el menú que interactúa con el usuario."""
 	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
@@ -306,7 +303,7 @@ def menu(grafo):
 			menu(grafo)
 		for i in range (len(ingreso)-1, 0, -1):
 			parametro = ingreso[i]
-			if not es_numero(parametro):
+			if not parametro.isdigit():
 				print("Los parametros deben ser dígitos.")
 				menu(grafo)
 		if(comando == 1):
@@ -440,8 +437,6 @@ def comunidades(grafo):
 				mas_aparece = labels[label]
 				label_mas_presente = label
 		vertice.label = label_mas_presente
-
-
 
 def main():
 	"""Función que corre el programa."""
