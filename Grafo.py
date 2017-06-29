@@ -12,8 +12,8 @@ class Vertice:
 		self.label = label
 		self.dic_ady = {}
 
-	def __repr__(self):
-		return self.iden
+	#def __repr__(self):
+	#	return self.iden
 
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
@@ -293,6 +293,9 @@ def verificar_parametros(comando, ingreso):
 			return False
 	return True
 
+def es_numero(parametro):
+	return parametro.isdigit()
+
 def menu(grafo):
 	"""Corre el menú que interactúa con el usuario."""
 	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
@@ -303,7 +306,7 @@ def menu(grafo):
 			menu(grafo)
 		for i in range (len(ingreso)-1, 0, -1):
 			parametro = ingreso[i]
-			if not parametro.isdigit():
+			if not es_numero(parametro):
 				print("Los parametros deben ser dígitos.")
 				menu(grafo)
 		if(comando == 1):
@@ -425,18 +428,35 @@ def estadisticas(grafo):
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
 def comunidades(grafo):
+	comunidades_d = {}
+	for i in range(2):
+		for vertice in grafo.obtener_vertices():
+			labels = {}
+			mas_aparece = 0
+			label_mas_presente = 0
+			for adyacente in list(grafo.adyacentes_vertice(vertice).values()):
+				apariciones = labels.get(adyacente.label, 0)
+				labels[adyacente.label] = apariciones + 1
+			for label in labels:
+				if labels[label] > mas_aparece:
+					mas_aparece = labels[label]
+					label_mas_presente = label
+			vertice.label = label_mas_presente
+		
+	comunidades_d = {}
 	for vertice in grafo.obtener_vertices():
-		labels = {}
-		mas_aparece = 0
-		label_mas_presente = 0
-		for adyacente in list(grafo.adyacentes_vertice(vertice).values()):
-			apariciones = labels.get(adyacente.label, 0)
-			labels[adyacente.label] = apariciones + 1
-		for label in labels:
-			if labels[label] > mas_aparece:
-				mas_aparece = labels[label]
-				label_mas_presente = label
-		vertice.label = label_mas_presente
+		lista = comunidades_d.get(vertice.label, [])
+		lista.append(vertice.iden)
+		comunidades_d[vertice.label] = lista
+
+	cantidad = 0
+	for label in comunidades_d:
+		if len(comunidades_d[label]) <= 4 or len(comunidades_d[label]) > 2000:
+			continue
+		cantidad+=1
+		print("Comunidad {}, {} integrantes: {}".format(label, len(comunidades_d[label]),comunidades_d[label]))
+	print("Cantidad de comunidades: {}".format(cantidad))
+
 
 def main():
 	"""Función que corre el programa."""
@@ -444,6 +464,13 @@ def main():
 	print("Generando grafo.")
 	grafo = generar_grafo(archivo)
 	print("Grafo generado.")
+	start = time.time()
+
+
+	comunidades(grafo)
+
+	end = time.time()
+	print(end-start)
 	if not grafo:
 		sys.exit()
 	menu(grafo)
