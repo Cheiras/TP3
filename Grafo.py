@@ -166,8 +166,8 @@ def procesar_archivo(grafo, archivo):
 					i += 1
 					continue
 				id_1, id_2 = linea.rstrip("\n").split("\t")
-				vertice_1 = Vertice(id_1, None)
-				vertice_2 = Vertice(id_2, None)
+				vertice_1 = Vertice(id_1, id_1)
+				vertice_2 = Vertice(id_2, id_2)
 				grafo.agregar_vertice(vertice_1)
 				grafo.agregar_vertice(vertice_2)
 				grafo.agregar_arista(vertice_1, vertice_2)
@@ -193,21 +193,25 @@ def get_rand_vert(lista):
 	return lista[posicion]
 
 def validar_vertice(vertice, grafo):
+	"""Verifica si el vértice se encuentra en el grafo."""
 	if vertice == -1:
 		print("El vertice no se encuentra en el grafo.")
 		return False
 	return True
 
 def validar_cantidad(cantidad, grafo):
+	"""Verifica que el numero pasado por parametro esté dentro del rango del grafo."""
 	return cantidad < grafo.cantidad_vertices()
 
 def verificar_elecciones(vertice, n, grafo):
+	"""Verifica las elecciones pasadas por parametro."""
 	if not validar_cantidad(n, grafo):
 		print("Ingreso una cantidad mayor a la del grafo.")
 		return False
 	return validar_vertice(vertice, grafo)
 
 def establecer_cantidad(n, grafo):
+	"""Establece la cantidad de random walks a hacer según el numero pasado por parametro."""
 	cantidad = n*100
 	if not validar_cantidad(cantidad, grafo):
 		cantidad = grafo.cantidad_vertices()
@@ -244,6 +248,7 @@ def crear_heap_menores(diccionario, largo):
 	return heap_min
 
 def recorrido_BFS(grafo, origen, destino):
+	"""Hace recorrido BFS desde un origen hasta un destino."""
 	visitados = {}
 	padre = {}
 	orden = {}
@@ -252,7 +257,6 @@ def recorrido_BFS(grafo, origen, destino):
 	q = Cola()
 	q.encolar(origen)
 	visitados[origen] = True
-
 	while not q.esta_vacia():
 		v = q.desencolar()
 		vertice = grafo.obtener_vertice(v)
@@ -265,10 +269,10 @@ def recorrido_BFS(grafo, origen, destino):
 					if(w == destino):
 						break;
 				q.encolar(w)
-
 	return padre, orden
 
 def verificar_parametros(comando, ingreso):
+	"""Verifica que los parametros ingresados por el usuario sean correctos."""
 	if len(ingreso) == 0 or len(ingreso) > 3:
 		print("Ingresó una cantidad incorrecta de parametros.")
 		return False
@@ -296,11 +300,12 @@ def es_numero(parametro):
 
 def similares(iden, n, grafo):
 	"""Dado un usuario, encontrar los personajes más similares a este."""
+	LARGO_RAN_WALKS = 30
 	vertice = grafo.obtener_vertice(iden)
 	if not verificar_elecciones(vertice, n, grafo):
 		return False
 	cantidad = establecer_cantidad(n, grafo)
-	apariciones = random_walk(cantidad, 30, vertice, grafo)
+	apariciones = random_walk(cantidad, LARGO_RAN_WALKS, vertice, grafo)
 	heap_min = crear_heap_menores(apariciones, n)
 	for i in range(len(heap_min)):
 		print("{} ".format(heap_min[i][1]),end=" ")
@@ -309,12 +314,13 @@ def similares(iden, n, grafo):
 def recomendar(iden, n, grafo):
 	"""Dado un usuario, recomienda otro (u otros) usuario con el cual aún no tenga relación,
 	 y sea lo más similar a él posible. Si la cantidad de similares < n, imprime la cantidad maxima."""
+	 LARGO_RAN_WALKS = 30
 	vertice = grafo.obtener_vertice(iden)
 	if not verificar_elecciones(vertice, n, grafo):
 		return False
 	cantidad = n*100
 	cantidad = establecer_cantidad(n, grafo)
-	apariciones = random_walk(cantidad, 30, vertice, grafo)
+	apariciones = random_walk(cantidad, LARGO_RAN_WALKS, vertice, grafo)
 	heap_min = crear_heap_menores(apariciones, n*2)
 	i = 0
 	lista = []
@@ -348,10 +354,13 @@ def camino(id_1, id_2, grafo):
 
 def centralidad(grafo, n):
 	"""Obtiene lo "n" vertices con mayor influencia del grafo utilizando random walks."""
+	CANT_RAN_WALKS = 10
+	LARGO_RAN_WALKS = 5
+	FACTOR_DE_CENTRALIDAD = 50
 	globales = {}
-	for i in range(n*50):
+	for i in range(n*FACTOR_DE_CENTRALIDAD):
 		vertice = random.choice(grafo.obtener_vertices())#check O(n)
-		apariciones = random_walk(10, 5, vertice, grafo)	
+		apariciones = random_walk(CANT_RAN_WALKS, LARGO_RAN_WALKS, vertice, grafo)	
 		for vertice in apariciones.keys():
 			apariciones = globales.get(vertice, 0) + 1
 			globales[vertice] = apariciones
@@ -361,7 +370,7 @@ def centralidad(grafo, n):
 	print("\n")
 
 def distancia(grafo, iden):
-	""" Obtiene la cantidad de elementos que hay para cada distancia del vertice ingresado."""
+	"""Obtiene la cantidad de elementos que hay para cada distancia del vertice ingresado."""
 	padre, orden = recorrido_BFS(grafo, iden, None)
 	distancias = {}
 	for vertice in orden.keys():
@@ -376,6 +385,7 @@ def distancia(grafo, iden):
 		print("Distancia {}: {}".format(elemento, len(distancias[elemento])))
 
 def estadisticas(grafo):
+	"""Imprime por pantalla las estadisticas del grafo."""
 	acumulador = 0
 	for vertice in grafo.obtener_vertices():
 		acumulador += len(grafo.adyacentes_vertice(vertice))
@@ -387,8 +397,8 @@ def estadisticas(grafo):
 	print("Densidad del Grafo: {} ".format(densidad))
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
 
-
 def menu(grafo):
+	"""Corre el menú que interactúa con el usuario."""
 	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
 	while True:
 		ingreso = input("Ingrese el comando deseado o 'S' para salir: ").split(" ")
@@ -426,4 +436,5 @@ def main():
 	if not grafo:
 		sys.exit()
 	menu(grafo)
+
 main()
