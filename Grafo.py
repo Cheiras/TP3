@@ -12,9 +12,6 @@ class Vertice:
 		self.label = label
 		self.dic_ady = {}
 
-	#def __repr__(self):
-	#	return self.iden
-
 	def adyacentes(self):
 		"""Devuelve un diccionario conteniendo a todos los adyacentes a un vertice."""
 		return self.dic_ady
@@ -293,9 +290,6 @@ def verificar_parametros(comando, ingreso):
 			return False
 	return True
 
-def es_numero(parametro):
-	return parametro.isdigit()
-
 def menu(grafo):
 	"""Corre el menú que interactúa con el usuario."""
 	opciones = {"similares":1, "recomendar":2, "camino":3, "centralidad":4, "distancias":5, "estadisticas":6, "comunidades":7, "s":8}
@@ -306,7 +300,7 @@ def menu(grafo):
 			menu(grafo)
 		for i in range (len(ingreso)-1, 0, -1):
 			parametro = ingreso[i]
-			if not es_numero(parametro):
+			if not parametro.isdigit():
 				print("Los parametros deben ser dígitos.")
 				menu(grafo)
 		if(comando == 1):
@@ -322,7 +316,10 @@ def menu(grafo):
 		if(comando == 6):
 			estadisticas(grafo)
 		if(comando == 7):
+			ini = time.time()
 			comunidades(grafo)
+			fin = time.time()
+			print("Tiempo:", (fin-ini))
 		if(comando == 8):
 			sys.exit()
 
@@ -429,7 +426,7 @@ def estadisticas(grafo):
 
 def comunidades(grafo):
 	comunidades_d = {}
-	for i in range(2):
+	for i in range(5):
 		for vertice in grafo.obtener_vertices():
 			labels = {}
 			mas_aparece = 0
@@ -464,13 +461,6 @@ def main():
 	print("Generando grafo.")
 	grafo = generar_grafo(archivo)
 	print("Grafo generado.")
-	start = time.time()
-
-
-	comunidades(grafo)
-
-	end = time.time()
-	print(end-start)
 	if not grafo:
 		sys.exit()
 	menu(grafo)
