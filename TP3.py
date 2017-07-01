@@ -13,7 +13,7 @@ def similares(iden, n, grafo):
 		return False
 	cantidad = establecer_cantidad(n, grafo)
 	apariciones = random_walk(cantidad, LARGO_RAN_WALKS, vertice, grafo)
-	heap_min = crear_heap_menores(apariciones, n)
+	heap_min = crear_heap_menores(apariciones, n, iden)
 	for i in range(len(heap_min)):
 		print("{} ".format(heap_min[i][1]),end=" ")
 	print("\n")
@@ -28,14 +28,13 @@ def recomendar(iden, n, grafo):
 	cantidad = n*100
 	cantidad = establecer_cantidad(n, grafo)
 	apariciones = random_walk(cantidad, LARGO_RAN_WALKS, vertice, grafo)
-	heap_min = crear_heap_menores(apariciones, n*2)
+	heap_min = crear_heap_menores(apariciones, n*2, iden)
 	i = 0
 	lista = []
-	while(i < n):
+	for i in range(len(heap_min)):
 		cant, vertice_aux = heapq.heappop(heap_min)
 		if not vertice_aux in list(grafo.adyacentes_vertice(vertice).keys()):
 			lista.append(vertice_aux)
-			i += 1
 	for c in range(len(lista)-1,-1,-1):
 		print("{} ".format(lista[(c)]),end=" ")
 	print("\n")
@@ -61,8 +60,8 @@ def camino(id_1, id_2, grafo):
 
 def centralidad(grafo, n):
 	"""Obtiene lo "n" vertices con mayor influencia del grafo utilizando random walks."""
-	CANT_RAN_WALKS = 10
-	LARGO_RAN_WALKS = 5
+	CANT_RAN_WALKS = 100
+	LARGO_RAN_WALKS = 3
 	FACTOR_DE_CENTRALIDAD = 50
 	globales = {}
 	for i in range(n*FACTOR_DE_CENTRALIDAD):
@@ -71,7 +70,7 @@ def centralidad(grafo, n):
 		for vertice in apariciones.keys():
 			apariciones = globales.get(vertice, 0) + 1
 			globales[vertice] = apariciones
-	heap = crear_heap_menores(globales, n)
+	heap = crear_heap_menores(globales, n, None)
 	for i in range(len(heap)):
 		print("{} ".format(heap[i][1]),end=" ")
 	print("\n")

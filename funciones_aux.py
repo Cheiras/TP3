@@ -69,7 +69,7 @@ def establecer_cantidad(n, grafo):
 def random_walk(largo, cantidad, vertice, grafo):
 	"""Genera un random walk."""
 	if not validar_cantidad(largo, grafo):
-		return -1
+		largo = grafo.cantidad_vertices()
 	apariciones = {}
 	v = vertice
 	for c in range(cantidad):
@@ -82,13 +82,15 @@ def random_walk(largo, cantidad, vertice, grafo):
 			v = w
 	return apariciones
 
-def crear_heap_menores(diccionario, largo):
+def crear_heap_menores(diccionario, largo, iden):
 	"""Genera un heap de menores de largo dado lleno de vertices similares 
 	al recibido por parametro."""
 	heap_min = []
 	heapq.heapify(heap_min)
 	for vertice in list(diccionario.keys()):
 		tupla = (diccionario[vertice], vertice)
+		if vertice == iden:
+			continue
 		if len(heap_min) < largo:
 			heapq.heappush(heap_min, tupla)
 		else:
@@ -141,4 +143,3 @@ def verificar_parametros(comando, ingreso):
 			print("Ingresó una cantidad incorrecta de parametros.")
 			return False
 	return True
-
