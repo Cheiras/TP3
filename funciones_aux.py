@@ -6,12 +6,12 @@ from TDAs import *
 
 def procesar_archivo(grafo, archivo):
 	"""Función que abre el archivo y linea por linea va generando vertices y aristas."""
-	lineas_de_cabecera = 3
+	lineas_de_cabecera = 4
 	try:
 		with open(archivo, "r") as archivo:
 			i = 0
 			for linea in archivo:
-				if (i <= lineas_de_cabecera):
+				if (i < lineas_de_cabecera):
 					i += 1
 					continue
 				id_1, id_2 = linea.rstrip("\n").split("\t")
