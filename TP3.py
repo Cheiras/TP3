@@ -29,14 +29,18 @@ def recomendar(iden, n, grafo):
 	cantidad = establecer_cantidad(n, grafo)
 	apariciones = random_walk(cantidad, LARGO_RAN_WALKS, vertice, grafo)
 	heap_min = crear_heap_menores(apariciones, n*2, iden)
-	i = 0
+	
 	lista = []
 	for i in range(len(heap_min)):
 		cant, vertice_aux = heapq.heappop(heap_min)
 		if not vertice_aux in list(grafo.adyacentes_vertice(vertice).keys()):
 			lista.append(vertice_aux)
+	contador = 0
 	for c in range(len(lista)-1,-1,-1):
+		if contador == n:
+			break
 		print("{} ".format(lista[(c)]),end=" ")
+		contador+=1
 	print("\n")
 	
 def camino(id_1, id_2, grafo):
@@ -57,6 +61,7 @@ def camino(id_1, id_2, grafo):
 	for i in range(len(camino)-1):
 		print("{}->".format(camino[len(camino)-1-i]),end="")
 	print("{}".format(id_2))
+	print("\n")
 
 def centralidad(grafo, n):
 	"""Obtiene lo "n" vertices con mayor influencia del grafo utilizando random walks."""
@@ -89,6 +94,7 @@ def distancia(grafo, iden):
 	lista.sort()
 	for i, elemento in enumerate(lista):
 		print("Distancia {}: {}".format(elemento, len(distancias[elemento])))
+	print("\n")
 
 def estadisticas(grafo):
 	"""Imprime por pantalla las estadisticas del grafo."""
@@ -102,10 +108,12 @@ def estadisticas(grafo):
 	print("Cantidad de Aristas: {}".format(grafo.cantidad_aristas()))
 	print("Densidad del Grafo: {} ".format(densidad))
 	print("Promedio de grado de entrada de cada vértice: {}".format(promedio))	
+	print("\n")
 
 def comunidades(grafo):
+	ITERACIONES = 5
 	comunidades_d = {}
-	for i in range(5):
+	for i in range(ITERACIONES):
 		for vertice in grafo.obtener_vertices():
 			labels = {}
 			mas_aparece = 0
@@ -124,14 +132,16 @@ def comunidades(grafo):
 		lista = comunidades_d.get(vertice.label, [])
 		lista.append(vertice.iden)
 		comunidades_d[vertice.label] = lista
-
 	cantidad = 0
+	MINIMO = 4
+	MAXIMO = 2000
 	for label in comunidades_d:
-		if len(comunidades_d[label]) <= 4 or len(comunidades_d[label]) > 2000:
+		if len(comunidades_d[label]) <= MINIMO or len(comunidades_d[label]) > MAXIMO:
 			continue
 		cantidad+=1
 		print("Comunidad {}, {} integrantes: {}".format(label, len(comunidades_d[label]),comunidades_d[label]))
 	print("Cantidad de comunidades: {}".format(cantidad))
+	print("\n")
 
 
 def menu(grafo):
